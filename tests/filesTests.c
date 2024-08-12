@@ -28,10 +28,25 @@ void TestGetNumberOfLinesFromFile(char* path, int numOfLines)
  assertTrue("Number of Lines match", result == numOfLines); 
 }
 
+void TestCheckIfFileExist(char* path)
+{
+ int result = CheckIfFileExists(path);
+
+ assertTrue("File exists!", result == FILE_EXIST);
+}
+
+void TestWriteOnFile(char* path, char* content)
+{
+  WriteNewLineOnFile(path, content);
+}
+
 int main()
 {
  TestReadFirstLine("./testContactFile.txt");
  TestGetNumberOfLinesFromFile("./testReadEntireFile.txt", 5);
+ TestCheckIfFileExist("./contacts.txt");
+
+ TestWriteOnFile("./contacts.txt", "Oscarito oscarito el alma de la fiesta");
 
  return 0;
 }

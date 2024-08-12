@@ -1,91 +1,116 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include"../app-data-persistence-logic/files.c"
+
+#include "../utils.c"
+#include"../app-data-persistence-logic/files-for-contactbooks.c"
+
+#define CONTACT_EXIST 0
+#define CONTACT_NOT_EXIST 1
 
 
-struct Contact
+void updateBunchOfContacts(struct ContactBook contactbook);
+void PrintInformationOfContact(struct Contact contact);
+void SearchContact(struct ContactBook contactbook);
+int CheckIfContactExist(struct Contact contact);
+
+struct ContactBook InitContactBookSystem()
 {
-  char* name; 
-  char* address;
-  char* cellphone;
-};
-
-struct ContactBook
-{
-  char* pathToFile;
-  struct Contact* bunchOfContacts;
-  int quantityOfContacts;
-};
-
-// Prototypes 
-
-void RecoverContactBookInformation(struct ContactBook* sourceBook, char* filename);
-
-void GenerateEmptyContactBook(struct ContactBook* sourceBook, char* filename);
-
-struct ContactBook GenerateOrRecoverContactBookFromCurrentDirectory(char* path);
-
-struct Contact* getContactsFromContactBookFile(char* path);
-
-struct Contact* CreateAndReturnBunchOfContactsPointerInHeap(int size);
-
-int getTotalOfContactsFromContactBookFile(char* path);
-
-// Implementation
-
-void RecoverContactBookInformation(struct ContactBook* sourceBook, char* filename)
-{
- sourceBook->file = createFilePointer(filename, WRITE);
- sourceBook->bunchOfContacts = getContactsFromContactBookFile(filename);
- sourceBook->quantityOfContacts = 0;
-}
-
-struct Contact* getContactsFromContactBookFile(char* path)
-{ 
-  int totalOfContacts = getTotalOfContactsFromContactBookFile(path);
-  struct Contact* bunchOfContacts = CreateAndReturnBunchOfContactsPointerInHeap(totalOfContacts);
-
-  return bunchOfContacts;
-}
-
-struct Contact* CreateAndReturnBunchOfContactsPointerInHeap(int size)
-{
- return (struct Contact*)malloc(size*sizeof(struct Contact));
-}
-
-int getTotalOfContactsFromContactBookFile(char* path)
-{
-  int lineNumber = getTotalOfLinesFromFile(path); // 8
-  int totalOfPropertiesOfContact= 4;
-
-  int totalOfContacts = lineNumber / totalOfPropertiesOfContact;
-
-  return totalOfContacts;
-}
-
-
-
-void GenerateEmptyContactBook(struct ContactBook* sourceBook, char* filename)
-{
- sourceBook->file = getFilePointer(filename, WRITE_AND_CREATES);
- sourceBook->quantityOfContacts = 0; 
-}
-
-struct ContactBook GenerateOrRecoverContactBookFromCurrentDirectory(char* path)
-{
- struct ContactBook contactbook;
-
- int verification = CheckIfFileExists(path); 
- 
- if(verification == FILE_NOT_EXIST)
- {
-   GenerateEmptyContactBook(&contactbook, path);
- }
-
- if(verification == FILE_EXIST)
- {
-   RecoverContactBookInformation(&contactbook, path);
- }
+ struct ContactBook contactbook = GenerateOrRecoverContactBookFromCurrentDirectory("./.contacts"); 
  
  return contactbook;
+}
+
+void AddNewContact(struct ContactBook* contactbook)
+{
+ struct Contact contact = {"", "", ""};
+ char name[35];
+ char address[50];
+ char cellphone[20];
+
+ system("clear");
+
+ puts("| Adding a new contact |");
+ 
+ puts("Type the name: ");
+
+ ClearBuffer();
+ fgets(name, 35, stdin);
+   
+ puts("Type the address: ");
+ fgets(address, 50, stdin);
+
+ puts("Type the cellphone: ");
+ fgets(cellphone, 20, stdin);
+ 
+ system("clear");
+
+ puts("Contact Added to the Book!");
+  
+ strcpy(contact.name, name);
+ strcpy(contact.address, address);
+ strcpy(contact.cellphone, cellphone);
+
+ createNewContactOnFile(contactbook->pathToFile, contact);
+
+ contactbook->quantityOfContacts++;
+ contactbook->bunchOfContacts = getContactsFromContactBookFile(contactbook->pathToFile); 
+}
+
+void updateBunchOfContacts(struct ContactBook contactbook)
+{
+  contactbook.bunchOfContacts = getContactsFromContactBookFile(contactbook.pathToFile);
+}
+
+void PrintAllContacts(struct ContactBook contactbook)
+{
+ char* path = contactbook.pathToFile;
+
+ PrintContentFromFile(path);
+}
+
+void SearchContact(struct ContactBook contactbook)
+{
+ char name[35];
+
+ puts("Type the name:");
+
+ ClearBuffer();
+
+ fgets(name, 35, stdin);
+
+ 
+ struct Contact contact = findContactByName(contactbook, name);
+
+ if(CheckIfContactExist(contact) == CONTACT_NOT_EXIST)
+ {
+   puts("Contact doesn't exist");
+   return;
+ }
+
+ PrintInformationOfContact(contact);
+}
+
+int CheckIfContactExist(struct Contact contact)
+{
+  char* name = contact.name;
+
+  if(strcmp(name, "") == 0)
+  {
+
+    return CONTACT_NOT_EXIST;
+  }
+
+  return CONTACT_EXIST;
+}
+
+void PrintInformationOfContact(struct Contact contact)
+{
+   char* name = contact.name;
+   char* address = contact.address;
+   char* cellphone = contact.cellphone;
+
+   puts("| Contact | ");
+   printf("| Name: %s", name);
+   printf("| Address: %s", address);
+   printf("| Cellphone: %s", cellphone);
 }

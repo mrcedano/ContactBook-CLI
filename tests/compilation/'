@@ -1,0 +1,16 @@
+#include<stdio.h>
+#include"./testUtils.c"
+#include"../app-data-persistence-logic/files-for-contactbooks.c"
+
+void TestRetrieveBunchOfContactsFromFile(char* path, int quantityOfContacts)
+{
+  struct Contact* bunchOfContacts = RetrieveBunchOfContactsFromFile(path, quantityOfContacts);
+  
+  printf("Name of the first contact: %s \n", bunchOfContacts[0].address);
+}
+
+int main()
+{
+ TestRetrieveBunchOfContactsFromFile("./TestBunchOfContacts.txt", 1);
+ return 0;
+}
